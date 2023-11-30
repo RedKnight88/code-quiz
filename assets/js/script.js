@@ -3,18 +3,26 @@ var timerText = document.querySelector("#timer");
 var mainEl = document.querySelector("#main");
 
 var scoreTimer = 120;
-
+var currentQuestion = 1;
 beginBtn.addEventListener("click", startQuiz);
 
 function startQuiz() {
+
     scoreTimer = 120;
+    var currentQuestion = 1;
+
     var intervalTimer = setInterval(function() {
         scoreTimer--;
         timerText.textContent = scoreTimer;
         
         if(scoreTimer <= 0) {
             clearInterval(intervalTimer);
-            // switch to name entry scene which will remove the timer anyways
+            endQuiz();
+        }
+
+        if(currentQuestion == 8) {
+            clearInterval(intervalTimer);
+            endQuiz();
         }
     }, 1000);
 
@@ -37,17 +45,36 @@ function startQuiz() {
             });
         }
 
-        // function to grab questions
+        newQuestion();
 }
 
 function endQuiz() {
-    // remove children from main besides h1
-    // add h2 stating score
-    // add form
+    var childrenMain = mainEl.children;
+        for(i = childrenMain.length - 1; i > 0; i--) {
+            mainEl.removeChild(childrenMain[i]);
+        }
+    mainEl.children[0].textContent = "Quiz Complete!"
+    var scoreStatement = document.createElement("h2");
+    scoreStatement.textContent = "Your final score is" + scoreTimer;
+
+    // might not be right html element, might not be right attribute, check tomorrow
+    var scoreForm = document.createElement("form"); 
+    scoreForm.setAttribute("type","text");
+
+    mainEl.appendChild(scoreStatement);
+    mainEl.appendChild(scoreForm);
 }
 
 function newQuestion() {
-
-    // during for, if i = correct index, questions.[currentQuestion].[i] 
-    // (now, answer) .setAttribute(dataset*something*,correct)
+    var questionIndex = "q" + currentQuestion;
+    mainEl.children[0].textContent = questions[questionIndex]["q"];
+    for (i = 1; i < 5; i++) {
+        var optionIndex = "op" + i;
+        var answer = questions[questionIndex][optionIndex];
+        mainEl.children[i].textContent = answer;
+        if (i == questions[questionIndex]["correctIndex"]) {
+            // mainEl.children[i].setAttribute("dataset","correct";)
+        }
+    }
+    currentQuestion++;
 }
