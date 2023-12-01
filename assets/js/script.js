@@ -9,18 +9,14 @@ beginBtn.addEventListener("click", startQuiz);
 function startQuiz() {
 
     scoreTimer = 120;
-    var currentQuestion = 1;
+    currentQuestion = 1;
+    var showAnswer = document.createElement("h5");
 
     var intervalTimer = setInterval(function() {
         scoreTimer--;
         timerText.textContent = scoreTimer;
         
         if(scoreTimer <= 0) {
-            clearInterval(intervalTimer);
-            endQuiz();
-        }
-
-        if(currentQuestion == 8) {
             clearInterval(intervalTimer);
             endQuiz();
         }
@@ -38,31 +34,69 @@ function startQuiz() {
             option.setAttribute("class",".option");
             mainEl.appendChild(option); 
             option.addEventListener("click", function (event) {
-                // grab dataset attribute for whether the answer was correct or not
-                // if correct, write message
-                // else, detract time, write message
-                // function to grab new questions
+                var correctCheck = event.target.dataset.answer;
+                if (correctCheck == "correct") {
+                    showAnswer.textContent = "Correct!";
+                } else {
+                    scoreTimer -= 15;
+                    showAnswer.textContent = "Incorrect!";
+                }
+
+                // maybe remove the or equals here, this is also hardcoded
+                if(currentQuestion >= 8) {
+                    clearInterval(intervalTimer);
+                    endQuiz();
+                } else {
+                newQuestion();
+                }
             });
+
+            mainEl.appendChild(showAnswer);
         }
 
         newQuestion();
 }
 
 function endQuiz() {
+    document.querySelector("#timer").remove();
     var childrenMain = mainEl.children;
         for(i = childrenMain.length - 1; i > 0; i--) {
             mainEl.removeChild(childrenMain[i]);
         }
     mainEl.children[0].textContent = "Quiz Complete!"
     var scoreStatement = document.createElement("h2");
-    scoreStatement.textContent = "Your final score is" + scoreTimer;
+    scoreStatement.textContent = "Your final score is " + scoreTimer;
 
     // might not be right html element, might not be right attribute, check tomorrow
-    var scoreForm = document.createElement("form"); 
+    var entryEl = document.createElement("h6");
+    var scoreForm = document.createElement("input"); 
+    var scoreSubmit = document.createElement("button"); 
     scoreForm.setAttribute("type","text");
+    entryEl.textContent = "Enter initials: "
+    scoreSubmit.textContent = "Submit!"
+
+    // add event listener
+    scoreSubmit.addEventListener("click", function() {
+        var entry = {
+            initials: scoreForm.value,
+            score: scoreTimer,
+        }
+        if (JSON.parse(localStorage.getItem("Leaderboard")) == undefined || JSON.parse(localStorage.getItem("Leaderboard")) == null) {
+            const firstArray = [entry];
+            localStorage.setItem("Leaderboard", JSON.stringify(firstArray));
+        } else {
+            const leaderArray = JSON.parse(localStorage.getItem("Leaderboard"));
+            leaderArray.push(entry);
+            localStorage.setItem("Leaderboard", JSON.stringify(leaderArray)); 
+        }       
+        // go to the new html link, relative path
+        // do i make a new .js
+    })
 
     mainEl.appendChild(scoreStatement);
-    mainEl.appendChild(scoreForm);
+    mainEl.appendChild(entryEl);
+    entryEl.appendChild(scoreForm);
+    entryEl.appendChild(scoreSubmit);
 }
 
 function newQuestion() {
@@ -73,7 +107,9 @@ function newQuestion() {
         var answer = questions[questionIndex][optionIndex];
         mainEl.children[i].textContent = answer;
         if (i == questions[questionIndex]["correctIndex"]) {
-            // mainEl.children[i].setAttribute("dataset","correct";)
+            mainEl.children[i].setAttribute("data-answer","correct");
+        } else {
+            mainEl.children[i].setAttribute("data-answer","false");
         }
     }
     currentQuestion++;
