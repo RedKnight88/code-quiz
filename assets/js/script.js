@@ -89,8 +89,7 @@ function endQuiz() {
             leaderArray.push(entry);
             localStorage.setItem("Leaderboard", JSON.stringify(leaderArray)); 
         }       
-        // go to the new html link, relative path
-        // do i make a new .js
+        window.open("./leaderboard.html","_self")
     })
 
     mainEl.appendChild(scoreStatement);
